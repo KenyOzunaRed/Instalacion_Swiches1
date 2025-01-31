@@ -1,0 +1,80 @@
+¡Gracias por la aclaración! Si es un switch y ejecutaron erase flash:, se eliminó el IOS de la memoria Flash, por lo que ahora el switch está en modo recuperación (switch:) y no puede arrancar normalmente.  
+
+---
+
+## 🔧 Recuperar el IOS en un Switch Cisco  
+
+### Paso 1: Verificar el modo de recuperación  
+Cuando enciendas el switch, debería mostrar algo como:  
+switch:
+Esto significa que el switch no encuentra el sistema operativo y necesita un nuevo IOS.
+
+---
+
+### Paso 2: Preparar el entorno para la recuperación  
+Necesitas:  
+✅ Un archivo IOS compatible (.bin) con el switch.  
+✅ Un servidor TFTP en tu PC.  
+✅ Un cable de consola conectado al switch para enviar los comandos.  
+
+Conéctate al switch usando PuTTY, SecureCRT o cualquier terminal serie.  
+
+---
+
+### Paso 3: Configurar la conexión TFTP  
+1. Conecta un cable Ethernet entre tu PC y el switch (puerto Fa0/1 o cualquier otro).  
+2. Configura una IP en tu PC en el mismo rango de red del switch, por ejemplo:  
+   - IP de la PC: 192.168.1.2  
+   - Máscara: 255.255.255.0  
+   - TFTP Server: Instalado en la PC y con el archivo IOS en la carpeta compartida.  
+
+---
+
+### Paso 4: Asignar una IP temporal al switch
+En el modo recuperación (`switch:`), ingresa:  
+switch: set IP_ADDR 192.168.1.1/24
+switch: set DEFAULT_ROUTER 192.168.1.254
+Esto asigna una IP para la transferencia del archivo.
+
+---
+
+### Paso 5: Cargar el IOS desde el servidor TFTP  
+Usa el siguiente comando para descargar el IOS desde el TFTP Server:  
+switch: copy tftp://192.168.1.2/c2960x-universalk9-mz.152-7.E3.bin flash:
+(Sustituye c2960x-universalk9-mz.152-7.E3.bin por el nombre real de tu archivo IOS).  
+
+Espera a que el archivo se transfiera. Esto puede tardar algunos minutos.
+
+---
+
+### Paso 6: Verificar y arrancar el IOS
+1. Confirma que el archivo se copió correctamente:  
+   
+   switch: dir flash:
+   
+   Deberías ver el nombre del archivo .bin.  
+   
+2. Indica al switch que lo use para el arranque:  
+   
+   switch: boot flash:c2960x-universalk9-mz.152-7.E3.bin
+   
+
+---
+
+### Paso 7: Guardar la configuración y reiniciar correctamente  
+Una vez que el switch arranque, ingresa a modo privilegiado (enable) y escribe:  
+enable
+write memory
+Luego, configura el arranque adecuado para que el switch inicie correctamente la próxima vez:  
+conf t
+boot system flash:/c2960x-universalk9-mz.152-7.E3.bin
+end
+write memory
+reload
+
+---
+
+## 🛑 ¿No tienes el IOS?
+Si no tienes el archivo .bin, puedes descargarlo desde [Cisco Software Download](https://software.cisco.com/) (requiere cuenta Cisco con acceso a descargas).  
+
+Si necesitas ayuda para encontrar el IOS correcto, dime el modelo exacto del switch.
